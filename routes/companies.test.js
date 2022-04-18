@@ -111,6 +111,23 @@ describe("GET /companies", function () {
     });
   });
 
+  test("ok min filter", async function () {
+    const resp = await request(app).get("/companies?minEmployees=2");
+    expect(resp.body.companies.length).toEqual(2);
+  });
+
+  test("ok max filter", async function () {
+    const resp = await request(app).get("/companies?maxEmployees=2");
+    expect(resp.body.companies.length).toEqual(2);
+  });
+
+  test("ok min and max filter", async function () {
+    const resp = await request(app).get(
+      "/companies?minEmployees=2&maxEmployees=2"
+    );
+    expect(resp.body.companies.length).toEqual(1);
+  });
+
   test("fails: test next() handler", async function () {
     // there's no normal failure event which will cause this route to fail ---
     // thus making it hard to test that the error-handler works with it. This

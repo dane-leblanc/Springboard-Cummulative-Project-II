@@ -59,7 +59,6 @@ class Company {
     let whereExpressions = [];
 
     const { name, minEmployees, maxEmployees } = filters;
-    console.log(+minEmployees);
 
     if (minEmployees !== undefined && isNaN(+minEmployees)) {
       throw new BadRequestError("Min Employees must be a number");
@@ -92,7 +91,6 @@ class Company {
       query += " WHERE " + whereExpressions.join(" AND ");
     }
     query += " ORDER BY name";
-    console.log(query);
     const companiesRes = await db.query(query, queryValues);
     return companiesRes.rows;
   }
