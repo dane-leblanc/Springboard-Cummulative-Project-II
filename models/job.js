@@ -111,7 +111,7 @@ class Job {
   }
 
   /** remove job by id
-   *    Throws "not found" if no id match. 
+   *    Throws "not found" if no id match.
    */
 
   static async remove(id) {

@@ -164,7 +164,7 @@ describe("remove", function () {
       },
     ]);
   });
-  
+
   test("not found if no id match", async function () {
     try {
       await Job.remove(0);
