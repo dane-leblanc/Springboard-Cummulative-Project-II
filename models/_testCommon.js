@@ -51,6 +51,7 @@ async function commonAfterEach() {
 }
 
 async function commonAfterAll() {
+  await db.query("ALTER SEQUENCE jobs_id_seq RESTART WITH 1");
   await db.end();
 }
 
