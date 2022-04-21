@@ -51,7 +51,6 @@ router.post("/", ensureAdmin, async function (req, res, next) {
 
 router.get("/", async function (req, res, next) {
   try {
-    console.log(next);
     const query = req.query;
     const companies = await Company.findAll(query);
     return res.json({ companies });
