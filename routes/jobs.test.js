@@ -23,7 +23,6 @@ afterAll(commonAfterAll);
 /************************************* POST /jobs */
 
 describe("POST /jobs", function () {
-  console.log("************** jobs.test", jobIds);
   const newJob = {
     title: "TestJob",
     salary: 1,
@@ -113,9 +112,9 @@ describe("GET /jobs", function () {
   });
 });
 
-/***************************** GET /companies/:handle */
+/***************************** GET /jobs/:id */
 
-describe("GET /jobs:id", function () {
+describe("GET /jobs/:id", function () {
   test("works for anon", async function () {
     const resp = await request(app).get(`/jobs/${jobIds[0]}`);
     expect(resp.body).toEqual({
@@ -133,5 +132,94 @@ describe("GET /jobs:id", function () {
         },
       },
     });
+  });
+
+  test("response for no job found", async function () {
+    const resp = await request(app).get("/jobs/0");
+    expect(resp.statusCode).toEqual(404);
+  });
+});
+
+/*************************************** PATCH /jobs/:id */
+
+describe("PATCH /jobs/:id", function () {
+  test("works for admin", async function () {
+    const resp = await request(app)
+      .patch(`/jobs/${jobIds[0]}`)
+      .send({
+        title: "j1-new",
+      })
+      .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.body).toEqual({
+      job: {
+        id: jobIds[0],
+        title: "j1-new",
+        salary: 1,
+        equity: "0.1",
+        companyHandle: "c1",
+      },
+    });
+  });
+
+  test("response for no job found", async function () {
+    const resp = await request(app)
+      .patch("/jobs/0")
+      .send({ title: "j1-new" })
+      .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.statusCode).toEqual(404);
+  });
+
+  test("bad request with invalid data", async function () {
+    const resp = await request(app)
+      .patch(`/jobs/${jobIds[0]}`)
+      .send({ salary: "one million dollars" })
+      .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.statusCode).toEqual(400);
+  });
+
+  test("unauthorized for user", async function () {
+    const resp = await request(app)
+      .patch(`/jobs/${jobIds[0]}`)
+      .send({ salary: 2 })
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("unauthorized for not logged in", async function () {
+    const resp = await request(app)
+      .patch(`/jobs/${jobIds[0]}`)
+      .send({ salary: 2 });
+    expect(resp.statusCode).toEqual(401);
+  });
+});
+
+/***************************************** DELETE /jobs/:id */
+
+describe("DELETE /jobs/:id", function () {
+  test("works for admin", async function () {
+    const resp = await request(app)
+      .delete(`/jobs/${jobIds[0]}`)
+      .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.body).toEqual({ deleted: jobIds[0] });
+  });
+
+  test("404 for id not found", async function () {
+    const resp = await request(app)
+      .delete(`/jobs/0`)
+      .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.statusCode).toEqual(404);
+  });
+
+  test("unauth for non admin", async function () {
+    const resp = await request(app)
+      .delete(`/jobs/${jobIds[0]}`)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("unauth for not signed in", async function () {
+    const resp = await request(app)
+      .delete(`/jobs/${jobIds[0]}`)
+    expect(resp.statusCode).toEqual(401);
   });
 });
