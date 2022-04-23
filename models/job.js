@@ -74,13 +74,25 @@ class Job {
       throw new BadRequestError("Min Salary must be a number");
     }
 
-    if (hasEquity !== undefined && typeof hasEquity !== "boolean") {
+    if (
+      hasEquity !== undefined &&
+      hasEquity !== "true" &&
+      hasEquity !== "false"
+    ) {
       throw new BadRequestError("hasEquity must be either 'true' of 'false'");
     }
 
     if (minSalary) {
       queryValues.push(minSalary);
       whereExpressions.push(`salary >= $${queryValues.length}`);
+    }
+
+    if (hasEquity === "true") {
+      whereExpressions.push(`equity <> '0.0'`);
+    }
+
+    if (hasEquity === "false") {
+      whereExpressions.push(`equity = '0.0'`);
     }
 
     if (title) {

@@ -84,6 +84,8 @@ describe("POST /jobs", function () {
   });
 });
 
+/************************ GET /jobs with filters */
+
 describe("GET /jobs", function () {
   test("ok for anon", async function () {
     const resp = await request(app).get("/jobs");
@@ -109,6 +111,57 @@ describe("GET /jobs", function () {
         },
       ],
     });
+  });
+
+  test("ok to filter by title", async function () {
+    const resp = await request(app).get("/jobs?title=j2");
+    expect(resp.body).toEqual({
+      jobs: [
+        {
+          title: "j2",
+          salary: 2,
+          equity: "0.2",
+          companyHandle: "c1",
+        },
+      ],
+    });
+  });
+
+  test("ok to filter by min salary", async function () {
+    const resp = await request(app).get("/jobs?minSalary=2");
+    expect(resp.body).toEqual({
+      jobs: [
+        {
+          title: "j2",
+          salary: 2,
+          equity: "0.2",
+          companyHandle: "c1",
+        },
+        {
+          title: "j3",
+          salary: 3,
+          equity: "0.3",
+          companyHandle: "c1",
+        },
+      ],
+    });
+  });
+
+  test("bad request if min salary is NaN", async function () {
+    const resp = await request(app).get("/jobs?minSalary=money");
+    expect(resp.statusCode).toEqual(400);
+  });
+
+  test("ok to filter by 'has equity'", async function () {
+    const resp = await request(app).get("/jobs?hasEquity=false");
+    expect(resp.body).toEqual({
+      jobs: [],
+    });
+  });
+
+  test("bad request if hasEquity is not true/false", async function () {
+    const resp = await request(app).get("/jobs?hasEquity=nahbro");
+    expect(resp.statusCode).toEqual(400);
   });
 });
 

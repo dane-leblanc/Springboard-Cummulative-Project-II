@@ -151,7 +151,7 @@ describe("findAll filters", function () {
 
   test("Equity filter works", async function () {
     let jobs = await Job.findAll({
-      hasEquity: true,
+      hasEquity: "true",
     });
     expect(jobs).toEqual([
       {
