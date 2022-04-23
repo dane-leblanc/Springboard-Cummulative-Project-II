@@ -9,6 +9,7 @@ const { createToken } = require("../helpers/tokens");
 const jobIds = [];
 
 async function commonBeforeAll() {
+  await db.query("DELETE FROM applications");
   // noinspection SqlWithoutWhere
   await db.query("DELETE FROM users");
   // noinspection SqlWithoutWhere

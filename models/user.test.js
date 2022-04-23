@@ -12,6 +12,7 @@ const {
   commonBeforeEach,
   commonAfterEach,
   commonAfterAll,
+  jobIds,
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -117,6 +118,7 @@ describe("findAll", function () {
         lastName: "U1L",
         email: "u1@email.com",
         isAdmin: false,
+        jobs: [2, 3],
       },
       {
         username: "u2",
@@ -124,6 +126,7 @@ describe("findAll", function () {
         lastName: "U2L",
         email: "u2@email.com",
         isAdmin: false,
+        jobs: [],
       },
     ]);
   });
@@ -209,13 +212,45 @@ describe("update", function () {
   });
 });
 
+/************************************** apply */
+
+describe("apply", function () {
+  test("works", async function () {
+    await User.apply("u1", jobIds[0]);
+    const res = await db.query("SELECT * FROM applications WHERE job_id=$1", [
+      jobIds[0],
+    ]);
+    expect(res.rows[0]).toEqual({
+      username: "u1",
+      job_id: jobIds[0],
+    });
+  });
+
+  test("not found for bad username", async function () {
+    try {
+      await User.apply("notauser", jobIds[0]);
+      fail();
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+
+  test("not found for bad job-id", async function () {
+    try {
+      await User.apply("u1", 0);
+      fail();
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+});
+
 /************************************** remove */
 
 describe("remove", function () {
   test("works", async function () {
     await User.remove("u1");
-    const res = await db.query(
-        "SELECT * FROM users WHERE username='u1'");
+    const res = await db.query("SELECT * FROM users WHERE username='u1'");
     expect(res.rows.length).toEqual(0);
   });
 

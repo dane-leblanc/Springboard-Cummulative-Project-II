@@ -107,6 +107,24 @@ router.patch(
   }
 );
 
+/** Apply /user/[username]/jobs/[jobId]
+ *
+ **/
+
+router.post(
+  "/:username/jobs/:id",
+  ensureAdminOrThisUser,
+  async function (req, res, next) {
+    try {
+      const jobId = +req.params.id;
+      await User.apply(req.params.username, jobId);
+      return res.json({ applied: jobId });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
 /** DELETE /[username]  =>  { deleted: username }
  *
  * Authorization required: admin or user deleting their own account

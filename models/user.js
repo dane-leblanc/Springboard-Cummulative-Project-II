@@ -97,11 +97,12 @@ class User {
 
   /** Find all users.
    *
-   * Returns [{ username, first_name, last_name, email, is_admin }, ...]
+   * Returns [{ username, first_name, last_name, email, is_admin, jobs}, ...]
+   *    where jobs: [ jobId, jobId, ... ]
    **/
 
   static async findAll() {
-    const result = await db.query(
+    const userRes = await db.query(
       `SELECT username,
                   first_name AS "firstName",
                   last_name AS "lastName",
@@ -111,7 +112,19 @@ class User {
            ORDER BY username`
     );
 
-    return result.rows;
+    const users = userRes.rows;
+
+    for (let user of users) {
+      const jobRes = await db.query(
+        `SELECT job_id AS jobId FROM applications
+          WHERE username = $1`,
+        [user.username]
+      );
+      let jobArr = jobRes.rows.map((job) => job.jobid);
+      user.jobs = jobArr;
+    }
+
+    return users;
   }
 
   /** Given a username, return data about user.
@@ -123,7 +136,7 @@ class User {
    **/
 
   static async get(username) {
-    const userRes = await db.query(
+    const result = await db.query(
       `SELECT username,
                   first_name AS "firstName",
                   last_name AS "lastName",
@@ -134,7 +147,7 @@ class User {
       [username]
     );
 
-    const user = userRes.rows[0];
+    const user = result.rows[0];
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
 
@@ -185,6 +198,38 @@ class User {
 
     delete user.password;
     return user;
+  }
+
+  /** Apply to job by adding username and job id to the applications table  */
+
+  static async apply(username, jobId) {
+    const checkUser = await db.query(
+      `SELECT username FROM users
+          WHERE username = $1`,
+      [username]
+    );
+    const user = checkUser.rows[0];
+    if (!user) {
+      throw new NotFoundError(`No user: ${username}`);
+    }
+
+    const checkJob = await db.query(
+      `SELECT title FROM jobs
+          WHERE id = $1`,
+      [jobId]
+    );
+    const job = checkJob.rows[0];
+    if (!job) {
+      throw new NotFoundError(`Job ID not found.`);
+    }
+
+    const result = await db.query(
+      `INSERT into applications (username, job_id)
+          VALUES ($1, $2)
+          RETURNING job_id AS "jobId"`,
+      [username, jobId]
+    );
+    return jobId;
   }
 
   /** Delete given user from database; returns undefined. */

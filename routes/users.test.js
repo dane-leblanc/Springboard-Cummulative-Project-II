@@ -13,6 +13,7 @@ const {
   commonAfterAll,
   u1Token,
   adminToken,
+  jobIds,
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -141,6 +142,7 @@ describe("GET /users", function () {
           lastName: "U1L",
           email: "user1@user.com",
           isAdmin: false,
+          jobs: [],
         },
         {
           username: "u2",
@@ -148,6 +150,7 @@ describe("GET /users", function () {
           lastName: "U2L",
           email: "user2@user.com",
           isAdmin: false,
+          jobs: [],
         },
         {
           username: "u3",
@@ -155,6 +158,7 @@ describe("GET /users", function () {
           lastName: "U3L",
           email: "user3@user.com",
           isAdmin: false,
+          jobs: [],
         },
       ],
     });
@@ -331,6 +335,41 @@ describe("PATCH /users/:username", () => {
     });
     const isSuccessful = await User.authenticate("u1", "new-password");
     expect(isSuccessful).toBeTruthy();
+  });
+});
+
+/************************************** POST /users/:username/jobs/:id */
+describe("user applies for job", function () {
+  test("works for admin", async function () {
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${jobIds[0]}`)
+      .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.body).toEqual({
+      applied: jobIds[0],
+    });
+  });
+
+  test("works for correct user", async function () {
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${jobIds[0]}`)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.body).toEqual({
+      applied: jobIds[0],
+    });
+  });
+
+  test("not found for bad username", async function () {
+    const resp = await request(app)
+      .post(`/users/notAuser/jobs/${jobIds[0]}`)
+      .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.statusCode).toEqual(404);
+  });
+
+  test("not found for bad job-id", async function () {
+    const resp = await request(app)
+      .post(`/users/u1/jobs/0`)
+      .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.statusCode).toEqual(404);
   });
 });
 
