@@ -38,7 +38,7 @@ describe("POST /jobs", function () {
     expect(resp.statusCode).toEqual(201);
     expect(resp.body).toEqual({
       job: {
-        id: jobIds.length + 1,
+        id: expect.any(Number),
         title: "TestJob",
         salary: 1,
         equity: "0",
@@ -99,13 +99,13 @@ describe("GET /jobs", function () {
           title: "j2",
           salary: 2,
           equity: "0.2",
-          companyHandle: "c2",
+          companyHandle: "c1",
         },
         {
           title: "j3",
           salary: 3,
           equity: "0.3",
-          companyHandle: "c3",
+          companyHandle: "c1",
         },
       ],
     });
@@ -218,8 +218,7 @@ describe("DELETE /jobs/:id", function () {
   });
 
   test("unauth for not signed in", async function () {
-    const resp = await request(app)
-      .delete(`/jobs/${jobIds[0]}`)
+    const resp = await request(app).delete(`/jobs/${jobIds[0]}`);
     expect(resp.statusCode).toEqual(401);
   });
 });

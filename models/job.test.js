@@ -28,7 +28,6 @@ describe("create", function () {
 
   test("works", async function () {
     let job = await Job.create(newJob);
-    expect(job).toEqual(newJob);
 
     const result = await db.query(
       `SELECT title, salary, equity, company_handle
@@ -90,8 +89,70 @@ describe("update", function () {
 /************************ Find all */
 
 describe("findAll", function () {
-  test("works", async function () {
+  test("works: no filter", async function () {
     let jobs = await Job.findAll();
+    expect(jobs).toEqual([
+      {
+        title: "title1",
+        salary: 100000,
+        equity: "0.5",
+        companyHandle: "c1",
+      },
+      {
+        title: "title2",
+        salary: 200000,
+        equity: "1",
+        companyHandle: "c2",
+      },
+      {
+        title: "title3",
+        salary: 300000,
+        equity: "0.8",
+        companyHandle: "c3",
+      },
+    ]);
+  });
+});
+
+describe("findAll filters", function () {
+  test("title filter works", async function () {
+    let jobs = await Job.findAll({
+      title: "title1",
+    });
+    expect(jobs).toEqual([
+      {
+        title: "title1",
+        salary: 100000,
+        equity: "0.5",
+        companyHandle: "c1",
+      },
+    ]);
+  });
+
+  test("Min Salary filter works", async function () {
+    let jobs = await Job.findAll({
+      minSalary: 150000,
+    });
+    expect(jobs).toEqual([
+      {
+        title: "title2",
+        salary: 200000,
+        equity: "1",
+        companyHandle: "c2",
+      },
+      {
+        title: "title3",
+        salary: 300000,
+        equity: "0.8",
+        companyHandle: "c3",
+      },
+    ]);
+  });
+
+  test("Equity filter works", async function () {
+    let jobs = await Job.findAll({
+      hasEquity: true,
+    });
     expect(jobs).toEqual([
       {
         title: "title1",

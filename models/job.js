@@ -1,7 +1,7 @@
 "use strict";
 
 const db = require("../db");
-const { NotFoundError } = require("../expressError");
+const { NotFoundError, BadRequestError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helpers/sql");
 
 /** Related functions for jobs. */
@@ -61,13 +61,39 @@ class Job {
    * Returns [{ title, salary, equity, companyHandle }]
    */
 
-  static async findAll() {
+  static async findAll(filters = {}) {
     let query = `SELECT title, salary, equity, 
                     company_handle AS "companyHandle"
                     FROM jobs`;
+    let queryValues = [];
+    let whereExpressions = [];
 
-    let result = await db.query(query);
-    return result.rows;
+    const { title, minSalary, hasEquity } = filters;
+
+    if (minSalary !== undefined && isNaN(+minSalary)) {
+      throw new BadRequestError("Min Salary must be a number");
+    }
+
+    if (hasEquity !== undefined && typeof hasEquity !== "boolean") {
+      throw new BadRequestError("hasEquity must be either 'true' of 'false'");
+    }
+
+    if (minSalary) {
+      queryValues.push(minSalary);
+      whereExpressions.push(`salary >= $${queryValues.length}`);
+    }
+
+    if (title) {
+      queryValues.push(`%${title}%`);
+      whereExpressions.push(`title ILIKE $${queryValues.length}`);
+    }
+
+    if (whereExpressions.length > 0) {
+      query += " WHERE " + whereExpressions.join(" AND ");
+    }
+    query += " ORDER BY title";
+    const jobsRes = await db.query(query, queryValues);
+    return jobsRes.rows;
   }
 
   /** Get job info by id.
