@@ -223,7 +223,7 @@ class User {
       throw new NotFoundError(`Job ID not found.`);
     }
 
-    const result = await db.query(
+    await db.query(
       `INSERT into applications (username, job_id)
           VALUES ($1, $2)
           RETURNING job_id AS "jobId"`,
