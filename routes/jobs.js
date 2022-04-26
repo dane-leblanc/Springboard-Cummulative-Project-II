@@ -2,15 +2,14 @@
 
 /** Routes for jobs. */
 
-const jsonschema = require("jsonschema");
 const express = require("express");
 
 const Job = require("../models/job");
 const { ensureAdmin } = require("../middleware/auth");
-const { BadRequestError } = require("../expressError");
 
 const jobNewSchema = require("../schemas/jobNew.json");
 const jobUpdateSchema = require("../schemas/jobUpdate.json");
+const { validationHelper } = require("../helpers/validate");
 
 const router = new express.Router();
 
@@ -25,11 +24,7 @@ const router = new express.Router();
 
 router.post("/", ensureAdmin, async function (req, res, next) {
   try {
-    const validator = jsonschema.validate(req.body, jobNewSchema);
-    if (!validator.valid) {
-      const errs = validator.errors.map((e) => e.stack);
-      throw new BadRequestError(errs);
-    }
+    validationHelper(req.body, jobNewSchema);
     const job = await Job.create(req.body);
     return res.status(201).json({ job });
   } catch (err) {
@@ -84,11 +79,7 @@ module.exports = router;
 
 router.patch("/:id", ensureAdmin, async function (req, res, next) {
   try {
-    const validator = jsonschema.validate(req.body, jobUpdateSchema);
-    if (!validator.valid) {
-      const errs = validator.errors.map((e) => e.stack);
-      throw new BadRequestError(errs);
-    }
+    validationHelper(req.body, jobUpdateSchema);
     const job = await Job.update(req.params.id, req.body);
     return res.json({ job });
   } catch (err) {
