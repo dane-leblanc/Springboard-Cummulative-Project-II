@@ -70,18 +70,6 @@ class Job {
 
     const { title, minSalary, hasEquity } = filters;
 
-    if (minSalary !== undefined && isNaN(+minSalary)) {
-      throw new BadRequestError("Min Salary must be a number");
-    }
-
-    if (
-      hasEquity !== undefined &&
-      hasEquity !== "true" &&
-      hasEquity !== "false"
-    ) {
-      throw new BadRequestError("hasEquity must be either 'true' of 'false'");
-    }
-
     if (minSalary) {
       queryValues.push(minSalary);
       whereExpressions.push(`salary >= $${queryValues.length}`);

@@ -9,7 +9,7 @@ const { ensureAdmin } = require("../middleware/auth");
 
 const jobNewSchema = require("../schemas/jobNew.json");
 const jobUpdateSchema = require("../schemas/jobUpdate.json");
-const { validationHelper } = require("../helpers/validate");
+const { validationHelper, validateJobFilter } = require("../helpers/validate");
 
 const router = new express.Router();
 
@@ -42,6 +42,7 @@ router.post("/", ensureAdmin, async function (req, res, next) {
 router.get("/", async function (req, res, next) {
   try {
     const query = req.query;
+    validateJobFilter(query);
     const jobs = await Job.findAll(query);
     return res.json({ jobs });
   } catch (err) {

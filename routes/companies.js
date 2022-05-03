@@ -6,7 +6,10 @@ const express = require("express");
 
 const { ensureAdmin } = require("../middleware/auth");
 const Company = require("../models/company");
-const { validationHelper } = require("../helpers/validate");
+const {
+  validationHelper,
+  validateCompanyFilter,
+} = require("../helpers/validate");
 
 const companyNewSchema = require("../schemas/companyNew.json");
 const companyUpdateSchema = require("../schemas/companyUpdate.json");
@@ -46,6 +49,7 @@ router.post("/", ensureAdmin, async function (req, res, next) {
 router.get("/", async function (req, res, next) {
   try {
     const query = req.query;
+    validateCompanyFilter(query);
     const companies = await Company.findAll(query);
     return res.json({ companies });
   } catch (err) {

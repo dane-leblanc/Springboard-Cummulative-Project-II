@@ -60,18 +60,6 @@ class Company {
 
     const { name, minEmployees, maxEmployees } = filters;
 
-    if (minEmployees !== undefined && isNaN(+minEmployees)) {
-      throw new BadRequestError("Min Employees must be a number");
-    }
-
-    if (maxEmployees !== undefined && isNaN(+maxEmployees)) {
-      throw new BadRequestError("Max Employees must be a number");
-    }
-
-    if (+minEmployees > +maxEmployees) {
-      throw new BadRequestError("Min cannot be greater than Max");
-    }
-
     if (+minEmployees) {
       queryValues.push(+minEmployees);
       whereExpressions.push(`num_employees >= $${queryValues.length}`);

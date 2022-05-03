@@ -128,6 +128,18 @@ describe("GET /companies", function () {
     expect(resp.body.companies.length).toEqual(1);
   });
 
+  test("bad request for minEmployees NaN", async function () {
+    const resp = await request(app).get("/companies?minEmployees=ten");
+    expect(resp.statusCode).toEqual(400);
+  });
+
+  test("bad request for min > max employees", async function () {
+    const resp = await request(app).get(
+      "/companies?minEmployees=8&maxEmployees=4"
+    );
+    expect(resp.statusCode).toEqual(400);
+  });
+
   test("fails: test next() handler", async function () {
     // there's no normal failure event which will cause this route to fail ---
     // thus making it hard to test that the error-handler works with it. This

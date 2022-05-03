@@ -145,37 +145,6 @@ describe("findAll filters", function () {
       },
     ]);
   });
-  test("bad min request", async function () {
-    try {
-      await Company.findAll({
-        minEmployees: "potato",
-      });
-      fail();
-    } catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy();
-    }
-  });
-  test("bad max request", async function () {
-    try {
-      await Company.findAll({
-        maxEmployees: "potato",
-      });
-      fail();
-    } catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy();
-    }
-  });
-  test("min higher than max", async function () {
-    try {
-      await Company.findAll({
-        minEmployees: 5,
-        maxEmployees: 3,
-      });
-      fail();
-    } catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy();
-    }
-  });
 });
 
 /************************************** get */
